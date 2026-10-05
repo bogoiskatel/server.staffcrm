@@ -2,7 +2,7 @@
 <div class="page-heading"><div><p class="eyebrow">STAFF CRM</p><h1><?=e($installation['name'])?></h1></div><span class="state received"><?=e(t('snapshot_count'))?>: <?=count($installation['snapshots'])?></span></div>
 <div class="detail-grid"><section class="panel"><h2><?=e(t('installation'))?></h2><dl class="installation-meta">
 <?php foreach(['uuid'=>'UUID','api_url'=>t('api_url'),'country_iso'=>t('country'),'postcode'=>t('postcode'),'registered_at'=>t('registered')] as $field=>$label): ?><dt><?=e($label)?></dt><dd><?=e($installation[$field]??'—')?></dd><?php endforeach; ?>
-<dt><?=e(t('status'))?></dt><dd><?=e($installation['attempts'] ? t((int)$installation['attempts'][0]['success']===1?'success':'failed') : t('missing'))?></dd>
+<dt><?=e(t('status'))?></dt><dd><?=e($installation['attempts'] ? t((int)$installation['attempts'][0]['success']===1?'success':'failed') : t($installation['snapshots']?'received':'missing'))?></dd>
 </dl></section><section class="panel"><h2><?=e(t('map'))?></h2><?php $coordinates=Statistics::coordinates($installation); if($coordinates): ?><div id="installation-map" class="map detail-map" data-point="<?=e(json_encode(['name'=>$installation['name'],'lat'=>$coordinates[0],'lng'=>$coordinates[1],'source'=>$coordinates[2]],JSON_THROW_ON_ERROR))?>"></div><div class="map-error" hidden role="status"></div><?php else: ?><p class="empty-state"><?=e(t('no_location'))?></p><?php endif; ?></section></div>
 <section class="panel"><div class="panel-heading"><h2><?=e(t('history'))?></h2><span class="muted"><?=e(t('utc'))?></span></div>
 <?php if(!$installation['snapshots']): ?><p class="empty-state"><?=e(t('all_periods'))?></p><?php endif; ?>

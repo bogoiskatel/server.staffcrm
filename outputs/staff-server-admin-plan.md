@@ -31,29 +31,29 @@
 Files: database/schema.sql, app/Statistics.php, app/Repository.php, cli/migrate.php, tests/run.php.
 Interfaces: Statistics::aggregate(array $rows, int $expected): array; Statistics::coordinates(array $installation): ?array; Repository::installations(?string $period): array; Repository::periods(): array; Repository::detail(string $uuid): ?array.
 
-- [ ] Write tests for NULL, zero, coverage, coordinate validation, period validation and MySQL uniqueness; run and observe missing implementation failures.
-- [ ] Implement schema, validators, repository and CLI operations.
-- [ ] Run PHP tests and isolated MySQL tests; verify uniqueness preserves existing snapshots.
-- [ ] Commit tested storage deliverable.
+- [x] Write tests for NULL, zero, coverage, coordinate validation, period validation and MySQL uniqueness; run and observe missing implementation failures.
+- [x] Implement schema, validators, repository and CLI operations.
+- [x] Run PHP tests and isolated MySQL tests; verify uniqueness preserves existing snapshots.
+- [x] Commit tested storage deliverable.
 
 ## Task 2 Auth and server pages
 
 Files: config.example.php, app/bootstrap.php, app/Auth.php, app/View.php, app/i18n.php, public/index.php, views/login.php, views/dashboard.php, views/detail.php, cli/password.php, local/start.py, local/stop.py.
 Interfaces: Auth accepts PDO + config, verifies login using password_verify, issues and checks CSRF; uses Repository from task 1. Routes: login, dashboard, installation, map, logout.
 
-- [ ] Write HTTP acceptance tests for redirects, CSRF, correct/wrong login, session expiry, rate limit, escaping and logout; observe missing application failures.
-- [ ] Implement configuration, auth, protected routes and UA/EN templates; restrict serving to public.
-- [ ] Run automated HTTP suite on isolated database and lint all PHP with PHP 7.4.
-- [ ] Commit tested application deliverable.
+- [x] Write HTTP acceptance tests for redirects, CSRF, correct/wrong login, session expiry, rate limit, escaping and logout; observe missing application failures.
+- [x] Implement configuration, auth, protected routes and UA/EN templates; restrict serving to public.
+- [x] Run automated HTTP suite on isolated database and lint all PHP with PHP 7.4.
+- [x] Commit tested application deliverable.
 
 ## Task 3 Frontend and delivery
 
 Files: public/assets/app.css, public/assets/app.js, public/assets/vendor/, README.md, tests/http_acceptance.py.
 Interfaces: map JSON provides only validated points and safe detail links; app.js initializes Leaflet and DataTables and responds to tab visibility.
 
-- [ ] Verify missing frontend behavior in browser against the functional acceptance script.
-- [ ] Add styles, responsive cards/tabs/table/map, local vendor files and licenses.
-- [ ] Inspect empty state, synthetic test dataset, search/sort, marker popup, detail page and mobile layout in browser; remove synthetic data from production database.
-- [ ] Run full suite, request independent review, fix important findings, commit and publish branch/PR if GitHub authorization permits.
+- [x] Verify missing frontend behavior in browser against the functional acceptance script.
+- [x] Add styles, responsive cards/tabs/table/map, local vendor files and licenses.
+- [x] Inspect empty state, synthetic test dataset, search/sort, marker popup, detail page and mobile layout in browser; remove synthetic data from production database.
+- [x] Run full suite, request independent review, fix important findings, commit and publish branch/PR if GitHub authorization permits.
 
 Execution authorization: user explicitly approved the spec and instructed implementation in this chat. Native inline execution preserves that direction; no additional approval gate for routine implementation choices.

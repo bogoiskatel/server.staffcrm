@@ -22,7 +22,7 @@ python3 local/start.py
 
 Open http://127.0.0.1:8090. Generated local credentials are in `outputs/local-access.txt`; the ignored `config.php` stores the username and password hash as variables. No default password is committed. Data lives under ignored `work/runtime/mysql`. Existing STAFF CRM services are untouched.
 
-The launcher also starts the isolated test server on port 8091 with the separate `server_test` database. This is a development-only service; both HTTP listeners bind to loopback. To stop them without removing data:
+The generated local setup also starts the isolated test server on port 8091 with the separate `server_test` database. If you supply your own config.php and have no local test configuration, only the main service starts. This is a development-only service; both HTTP listeners bind to loopback. To stop them without removing data:
 
 ```sh
 python3 local/stop.py

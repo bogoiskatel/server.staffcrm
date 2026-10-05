@@ -41,7 +41,7 @@ final class Auth
             $valid = password_verify($password, $this->config['admin_password_hash']);
             if (!$valid || !hash_equals($this->config['admin_username'], $username)) { return 'invalid'; }
             session_regenerate_id(true);
-            $_SESSION = ['authenticated'=>true, 'last_activity'=>time(), 'csrf'=>bin2hex(random_bytes(32))];
+            $_SESSION = ['authenticated'=>true, 'last_activity'=>time(), 'csrf'=>bin2hex(random_bytes(32)), 'locale'=>$_SESSION['locale']??$this->config['locale']];
             return 'success';
         } finally {
             $this->db->prepare('SELECT RELEASE_LOCK(?)')->execute(['login:'.$hash]);

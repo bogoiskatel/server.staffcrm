@@ -18,7 +18,7 @@ final class Repository
     // Return available reporting periods, newest first.
     public function periods(): array
     {
-        return $this->db->query('SELECT DISTINCT reporting_period FROM statistics_snapshots ORDER BY reporting_period DESC')->fetchAll(PDO::FETCH_COLUMN);
+        return $this->db->query('SELECT DISTINCT s.reporting_period FROM statistics_snapshots s JOIN installations i ON i.id=s.installation_id WHERE i.active=1 ORDER BY s.reporting_period DESC')->fetchAll(PDO::FETCH_COLUMN);
     }
 
     // Load one installation and its immutable historical snapshots.

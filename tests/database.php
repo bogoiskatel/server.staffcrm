@@ -13,6 +13,9 @@ $second=$db->lastInsertId();
 $q=$db->prepare('INSERT INTO statistics_snapshots(installation_id,reporting_period,generated_at,collected_at,members_total,baptized_this_month) VALUES(?,?,?,?,?,?)');
 $q->execute([$first,'2026-09','2026-10-01 00:00:00','2026-10-01 00:05:00',12,0]);
 $q->execute([$second,'2026-08','2026-09-01 00:00:00','2026-09-01 00:05:00',999,4]);
+$db->exec("INSERT INTO installations(uuid,name,api_url,registered_at,active) VALUES('33333333-3333-4333-8333-333333333333','Inactive','https://inactive.example.invalid/api/v1/statistics','2026-09-01 00:00:00',0)");
+$inactive=$db->lastInsertId();
+$q->execute([$inactive,'2026-10','2026-11-01 00:00:00','2026-11-01 00:05:00',5000,99]);
 try { $q->execute([$first,'2026-09','2026-10-02 00:00:00','2026-10-02 00:05:00',20,5]); throw new RuntimeException('Duplicate snapshot accepted'); } catch(PDOException $e) { if($e->getCode()!=='23000') {throw $e;} }
 $repo=new Repository($db); $rows=$repo->installations('2026-09');
 $sum=Statistics::aggregate($rows,2);

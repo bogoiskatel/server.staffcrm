@@ -45,9 +45,12 @@ if not config.exists():
     (ROOT/'work/test-config.php').write_text(testconfig); (ROOT/'work/test-config.php').chmod(0o600)
     (ROOT/'work/test-access.json').write_text(json.dumps({'username':'admin','password':password})); (ROOT/'work/test-access.json').chmod(0o600)
 subprocess.run([PHP,str(ROOT/'cli/migrate.php')],cwd=ROOT,check=True)
-env = os.environ.copy(); env['STAFF_SERVER_CONFIG'] = str(ROOT/'work/test-config.php')
-subprocess.run([PHP,str(ROOT/'cli/migrate.php')],cwd=ROOT,env=env,check=True)
-for port, filename, cfg in [(8090,'php',config),(8091,'test-php',ROOT/'work/test-config.php')]:
+services = [(8090,'php',config)]
+if (ROOT/'work/test-config.php').exists():
+    env = os.environ.copy(); env['STAFF_SERVER_CONFIG'] = str(ROOT/'work/test-config.php')
+    subprocess.run([PHP,str(ROOT/'cli/migrate.php')],cwd=ROOT,env=env,check=True)
+    services.append((8091,'test-php',ROOT/'work/test-config.php'))
+for port, filename, cfg in services:
     with socket.socket() as check:
         if check.connect_ex(('127.0.0.1',port)) == 0:
             if not (STATE/(filename+'.pid')).exists(): raise RuntimeError('Port already occupied: '+str(port))
@@ -55,6 +58,6 @@ for port, filename, cfg in [(8090,'php',config),(8091,'test-php',ROOT/'work/test
     sessions = STATE/(filename+'-sessions'); sessions.mkdir(exist_ok=True); sessions.chmod(0o700)
     env = os.environ.copy(); env['STAFF_SERVER_CONFIG'] = str(cfg)
     with (STATE/(filename+'.log')).open('ab') as log:
-        process = subprocess.Popen([PHP,'-d','display_errors=0','-d','session.save_path='+str(sessions),'-S','127.0.0.1:'+str(port),'-t',str(ROOT/'public'),str(ROOT/'local/router.php')],cwd=ROOT,env=env,stdout=log,stderr=log,start_new_session=True)
+        process = subprocess.Popen([PHP,'-d','display_errors=0','-d','opcache.enable=0','-d','session.save_path='+str(sessions),'-S','127.0.0.1:'+str(port),'-t',str(ROOT/'public'),str(ROOT/'local/router.php')],cwd=ROOT,env=env,stdout=log,stderr=log,start_new_session=True)
     (STATE/(filename+'.pid')).write_text(str(process.pid))
 print('STAFF SERVER: http://127.0.0.1:8090 — credentials: outputs/local-access.txt')
