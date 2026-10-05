@@ -46,7 +46,7 @@
   // Keep request editing controls unsorted while ordering incoming requests newest first.
   $('#crm-table, #orders-table').each(function () {
     const orders=this.id==='orders-table';
-    $(this).DataTable({pageLength:25,order:[[0,orders?'desc':'asc']],columnDefs:orders?[{targets:[9,10,11],orderable:false}]:[],language:{
+    $(this).DataTable({pageLength:25,lengthChange:orders,order:[[0,orders?'desc':'asc']],columnDefs:orders?[{targets:[9,10,11],orderable:false}]:[],language:{
       search:labels.search,lengthMenu:labels.length,info:labels.info,infoEmpty:labels.no_data,emptyTable:labels.no_data,
       zeroRecords:labels.zero_records,infoFiltered:'',paginate:{previous:labels.previous,next:labels.next}
     }});
