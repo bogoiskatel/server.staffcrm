@@ -1,0 +1,6 @@
+/config.php
+/work/
+/.superpowers/
+/outputs/local-access.txt
+*.log
+.DS_Store
