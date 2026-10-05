@@ -66,3 +66,10 @@
 .orders-table .form-control{min-width:150px}
 .orders-table .order-comment{min-width:240px;white-space:pre-wrap}
 @media(max-width:600px){.order-fields{grid-template-columns:1fr}}
+
+.report-form{flex-wrap:wrap;justify-content:flex-end}
+.report-fields{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.report-fields input{max-width:180px}
+.report-explanation{margin-bottom:20px}
+
+#network-panel .report-form{justify-content:flex-start;margin-bottom:16px}

@@ -1,6 +1,20 @@
 <?php
 return [
  'uk'=>[
+ 'latest_data'=>'Останні отримані дані',
+ 'report'=>'Звіт',
+ 'report_all'=>'За увесь період',
+ 'report_year'=>'За рік:',
+ 'report_month'=>'За місяць:',
+ 'report_range'=>'За інтервал дат',
+ 'year'=>'Рік',
+ 'month'=>'Місяць',
+ 'current_month'=>'Поточний місяць',
+ 'select_month'=>'Обрати рік і місяць',
+ 'date_from'=>'З',
+ 'date_to'=>'По',
+ 'snapshot_report_note'=>'Останній знімок кожної CRM у вибраному періоді. Місячні та річні показники відповідають періоду цього знімка. Інтервал дат — за часом формування знімка в UTC.',
+
  'orders'=>'Замовлення',
  'order_add'=>'Додати замовлення',
  'order_saved'=>'Замовлення збережено.',
@@ -28,6 +42,20 @@ return [
  'network'=>'Мережа','statistics'=>'Статистика','login'=>'Увійти','username'=>'Ім’я користувача','password'=>'Пароль','logout'=>'Вийти','welcome'=>'Адміністрування мережі STAFF CRM','sign_in'=>'Вхід до STAFF SERVER','invalid'=>'Невірне ім’я користувача або пароль.','limited'=>'Забагато спроб входу. Спробуйте пізніше.','period'=>'Звітний місяць','apply'=>'Показати','crm_total'=>'Установок STAFF CRM','members_total'=>'Членів церкви','baptized_this_month'=>'Охрещені за місяць','baptized_this_year'=>'Охрещені за рік','joined_this_year'=>'Приєдналися за рік','left_this_year'=>'Вибули за рік','groups_current_season'=>'Домашніх груп сезону','discipline_total'=>'На дисципліні','coverage'=>'Отримано знімків','partial'=>'Неповний підсумок','no_data'=>'Немає даних','church'=>'Церква','country'=>'Країна','postcode'=>'Поштовий індекс','registered'=>'Зареєстровано','last_collection'=>'Останній успішний збір','status'=>'Стан збору','received'=>'Отримано','missing'=>'Очікуємо дані','failed'=>'Помилка збору','empty'=>'У мережі ще немає зареєстрованих CRM.','map'=>'Карта мережі','no_location'=>'Без визначеного розташування','approximate'=>'Приблизно за поштовим індексом','church_location'=>'Координати церкви','details'=>'Детальніше','back'=>'До мережі','installation'=>'Дані установки','history'=>'Історія статистики','generated'=>'Сформовано CRM','collected'=>'Отримано сервером','last_successful_login'=>'Останній успішний вхід у CRM','attempts'=>'Останні спроби збору','error_code'=>'Код помилки','success'=>'Успішно','api_url'=>'Адреса API','all_periods'=>'Знімки ще не отримано','map_unavailable'=>'Картографічні тайли недоступні. Маркери залишаються доступними.','utc'=>'Час у UTC','snapshot_count'=>'Знімків','search'=>'Пошук:','length'=>'Показати _MENU_ записів','info'=>'Записи _START_–_END_ із _TOTAL_','zero_records'=>'Збігів не знайдено','previous'=>'Назад','next'=>'Далі','map_wait'=>'Карта завантажується…','bad_request'=>'Некоректний запит','not_found'=>'Установку не знайдено','unavailable'=>'Сервіс тимчасово недоступний.','partial_detail'=>'Відомі значення','name'=>'Назва',
  ],
  'en'=>[
+ 'latest_data'=>'Latest received data',
+ 'report'=>'Report',
+ 'report_all'=>'All time',
+ 'report_year'=>'By year:',
+ 'report_month'=>'By month:',
+ 'report_range'=>'Date range',
+ 'year'=>'Year',
+ 'month'=>'Month',
+ 'current_month'=>'Current month',
+ 'select_month'=>'Choose year and month',
+ 'date_from'=>'From',
+ 'date_to'=>'To',
+ 'snapshot_report_note'=>'Latest snapshot per CRM within the selected period. Monthly and annual counters refer to that snapshot period. Date ranges use the snapshot generation time in UTC.',
+
  'orders'=>'Orders',
  'order_add'=>'Add order',
  'order_saved'=>'Order saved.',

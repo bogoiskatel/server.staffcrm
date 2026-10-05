@@ -6,8 +6,13 @@
   });
   // Keep the user menu open while its language selector is being used.
   $('.user-dd').on('click', function (event) { event.stopPropagation(); });
-  const periodForm=document.querySelector('.period-form');
-  if(periodForm) periodForm.hidden=document.getElementById('orders-panel')&&!document.getElementById('orders-panel').hidden;
+  // Show only the inputs belonging to the selected report mode.
+  const reportMode=document.getElementById('report-mode');
+  if(reportMode) reportMode.addEventListener('change',function(){
+    document.querySelectorAll('[data-report-mode]').forEach(function(group){const active=group.dataset.reportMode===reportMode.value;group.hidden=!active;group.querySelectorAll('[name]').forEach(function(input){input.disabled=!active;});});
+  });
+  const monthInput=document.getElementById('report-month');
+  if(monthInput) monthInput.addEventListener('change',function(){const select=document.getElementById('period');if(!Array.from(select.options).some(function(option){return option.value===monthInput.value;}))select.add(new Option(monthInput.value,monthInput.value));select.value=monthInput.value;});
   const settings = JSON.parse(document.getElementById('app-settings').textContent);
   const labels = settings.labels;
   let networkMap;
@@ -59,8 +64,6 @@
       document.getElementById('network-panel').hidden = tab !== 'network';
       document.getElementById('statistics-panel').hidden = tab !== 'statistics';
       document.getElementById('orders-panel').hidden = tab !== 'orders';
-      document.querySelector('.period-form').hidden = tab === 'orders';
-      document.querySelector('.period-form input[name="tab"]').value = tab;
       window.history.replaceState(null, '', link.href);
       if (networkMap) { networkMap.invalidateSize(); }
       $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();

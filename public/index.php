@@ -63,10 +63,12 @@ try {
         $_SESSION['order_saved']=true;header('Location: '.routeUrl('dashboard',['tab'=>'orders']),true,303);exit;
     }
     if ($method !== 'GET') { http_response_code(405); header('Allow: GET'); exit('GET required'); }
-    $periods = $repo->periods(); $period = $_GET['period'] ?? ($periods[0] ?? null);
-    if ($period !== null && (!is_string($period) || !Statistics::validPeriod($period))) { http_response_code(400); exit(t('bad_request')); }
+    $periods=$repo->periods();
+    try{$report=ReportFilter::fromQuery($_GET,$periods[0]??null);}
+    catch(InvalidArgumentException $e){http_response_code(400);exit(t('bad_request'));}
+    $period=$report->label();
     if ($route === 'dashboard' || $route === 'map') {
-        $rows = $repo->installations($period);
+        $rows = $repo->installationsForReport($report);
         if ($route === 'map') {
             $points=[];
             foreach ($rows as $row) {
@@ -77,8 +79,9 @@ try {
             echo json_encode(['points'=>$points], JSON_THROW_ON_ERROR); exit;
         }
         $tab=in_array($_GET['tab']??'',['network','statistics','orders'],true)?$_GET['tab']:'network';
+        $registryRows=$repo->installationsForReport(ReportFilter::fromQuery(['report'=>'all'],null));
         $orders=(new Orders($db))->all();$orderSaved=!empty($_SESSION['order_saved']);unset($_SESSION['order_saved']);
-        render('dashboard',['rows'=>$rows,'period'=>$period,'periods'=>$periods,'totals'=>Statistics::aggregate($rows,count($rows)),'tab'=>$tab,'orders'=>$orders,'orderSaved'=>$orderSaved]); exit;
+        render('dashboard',['rows'=>$rows,'period'=>$period,'periods'=>$periods,'totals'=>Statistics::aggregate($rows,count($rows)),'tab'=>$tab,'orders'=>$orders,'orderSaved'=>$orderSaved,'report'=>$report,'registryRows'=>$registryRows]); exit;
     }
     if ($route === 'installation') {
         $uuid = $_GET['uuid'] ?? '';
