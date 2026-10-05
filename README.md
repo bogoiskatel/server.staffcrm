@@ -80,3 +80,11 @@ python3 local/connect-crm.py
 The local helper provisions only the mutable working CRM database and its runtime copy, preserving imported clones and product checkout. It starts a certificate-verified loopback TLS proxy on 8766 forwarding the fixed API route to 8765, supplies the API's private config, and issues a statistics-only bearer. Credentials/certificates remain under ignored work/integration with private file permissions. Rerun the helper after restarting or rebuilding the CRM demo. The helper keeps the original UUID and bearer on reruns. No scheduled cron has been installed; use the same absolute CLI path in an operator-selected cron schedule when ready.
 
 phpMyAdmin runs separately on http://127.0.0.1:8092 using PHP 8.2; STAFF SERVER remains PHP 7.4. Its database viewer credentials are in ignored outputs/local-access.txt.
+
+## Demo orders
+
+The Orders tab uses the separate `demo_orders` table. Admins can add requests and save Waiting / Issued / Paid / Installed status with a comment per row. Saves require login and CSRF; a version check prevents overwriting notes from another tab. Phone and membership ranges remain strings, and submitted date stays a date. Personal request data is not stored in tracked files.
+
+The website form on staffcrm.org currently posts to `send_request.php`. Its existing server-side handler must send JSON to the deployed STAFF SERVER `/?route=orders-receive` over HTTPS with `Authorization: Bearer <orders_webhook_key>`. Keep the shared key in private server-side configs, never browser JavaScript. Required fields: contact, email, order_date (YYYY-MM-DD), source_ref (stable unique request identifier). Optional fields: phone, city, church, members, message, ip. Combine the website surname/name into contact. Retries use the same source_ref; repeated delivery does not reset status or comment. Receiver does not use browser cookies. The local 127.0.0.1 endpoint cannot receive traffic from the public website; website integration requires an externally reachable HTTPS deployment and editing its handler.
+
+Private existing requests can also be imported locally via `php cli/import-order.php /private/request.json`. Order tests are `php tests/orders.php` and `python3 tests/orders_http.py` (isolated server_test only).

@@ -85,3 +85,24 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
  version VARCHAR(64) PRIMARY KEY,
  applied_at DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS demo_orders (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ source_ref VARCHAR(128) CHARACTER SET ascii COLLATE ascii_bin NULL UNIQUE,
+ contact VARCHAR(200) NOT NULL,
+ email VARCHAR(254) NOT NULL,
+ phone VARCHAR(80) NOT NULL DEFAULT '',
+ city VARCHAR(200) NOT NULL DEFAULT '',
+ church VARCHAR(200) NOT NULL DEFAULT '',
+ members VARCHAR(80) NOT NULL DEFAULT '',
+ message TEXT NOT NULL,
+ ip VARCHAR(45) NOT NULL DEFAULT '',
+ order_date DATE NOT NULL,
+ status VARCHAR(16) NOT NULL DEFAULT 'waiting',
+ comment TEXT NOT NULL,
+ version INT UNSIGNED NOT NULL DEFAULT 1,
+ created_at DATETIME NOT NULL,
+ updated_at DATETIME NOT NULL,
+ INDEX recent_orders(order_date,id),
+ CHECK(status IN ('waiting','issued','paid','installed'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

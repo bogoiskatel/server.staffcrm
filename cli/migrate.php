@@ -8,4 +8,5 @@ if (!$db->query("SHOW COLUMNS FROM statistics_snapshots LIKE 'source_metadata'")
 }
 $db->prepare('INSERT IGNORE INTO schema_migrations(version,applied_at) VALUES(?,?)')->execute(['001',gmdate('Y-m-d H:i:s')]);
 $db->prepare('INSERT IGNORE INTO schema_migrations(version,applied_at) VALUES(?,?)')->execute(['002-source-metadata',gmdate('Y-m-d H:i:s')]);
+$db->prepare('INSERT IGNORE INTO schema_migrations(version,applied_at) VALUES(?,?)')->execute(['003-demo-orders',gmdate('Y-m-d H:i:s')]);
 echo "Schema ready\n";

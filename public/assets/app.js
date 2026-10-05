@@ -6,6 +6,8 @@
   });
   // Keep the user menu open while its language selector is being used.
   $('.user-dd').on('click', function (event) { event.stopPropagation(); });
+  const periodForm=document.querySelector('.period-form');
+  if(periodForm) periodForm.hidden=document.getElementById('orders-panel')&&!document.getElementById('orders-panel').hidden;
   const settings = JSON.parse(document.getElementById('app-settings').textContent);
   const labels = settings.labels;
   let networkMap;
@@ -41,12 +43,14 @@
   }
   const detail = document.getElementById('installation-map');
   if (detail) { createMap(detail, [JSON.parse(detail.dataset.point)]); }
-  if (document.getElementById('crm-table')) {
-    $('#crm-table').DataTable({ pageLength: 25, order: [[0, 'asc']], language: {
-      search: labels.search, lengthMenu: labels.length, info: labels.info, infoEmpty: labels.no_data, emptyTable: labels.no_data,
-      zeroRecords: labels.zero_records, infoFiltered: '', paginate: { previous: labels.previous, next: labels.next }
+  // Keep request editing controls unsorted while ordering incoming requests newest first.
+  $('#crm-table, #orders-table').each(function () {
+    const orders=this.id==='orders-table';
+    $(this).DataTable({pageLength:25,order:[[0,orders?'desc':'asc']],columnDefs:orders?[{targets:[9,10,11],orderable:false}]:[],language:{
+      search:labels.search,lengthMenu:labels.length,info:labels.info,infoEmpty:labels.no_data,emptyTable:labels.no_data,
+      zeroRecords:labels.zero_records,infoFiltered:'',paginate:{previous:labels.previous,next:labels.next}
     }});
-  }
+  });
   document.querySelectorAll('[data-tab]').forEach(function (link) {
     link.addEventListener('click', function (event) {
       event.preventDefault();
@@ -54,6 +58,8 @@
       document.querySelectorAll('[data-tab]').forEach(function (item) { item.classList.toggle('active', item === link); });
       document.getElementById('network-panel').hidden = tab !== 'network';
       document.getElementById('statistics-panel').hidden = tab !== 'statistics';
+      document.getElementById('orders-panel').hidden = tab !== 'orders';
+      document.querySelector('.period-form').hidden = tab === 'orders';
       document.querySelector('.period-form input[name="tab"]').value = tab;
       window.history.replaceState(null, '', link.href);
       if (networkMap) { networkMap.invalidateSize(); }

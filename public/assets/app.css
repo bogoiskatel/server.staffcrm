@@ -60,3 +60,9 @@
 .staff-navbar .top-actions{margin-left:auto}
 .staff-navbar .dropdown-menu{max-width:calc(100vw - 30px)}
 .staff-navbar .dropdown-item[type=submit]{cursor:pointer}
+
+.order-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px}
+.orders-table td.order-message{white-space:normal;min-width:220px;max-width:360px}
+.orders-table .form-control{min-width:150px}
+.orders-table .order-comment{min-width:240px;white-space:pre-wrap}
+@media(max-width:600px){.order-fields{grid-template-columns:1fr}}

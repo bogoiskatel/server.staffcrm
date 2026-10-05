@@ -23,3 +23,5 @@ require_once __DIR__ . '/Statistics.php';
 require_once __DIR__ . '/Repository.php';
 require_once __DIR__ . '/Auth.php';
 require_once __DIR__ . '/View.php';
+
+require_once __DIR__.'/Orders.php';

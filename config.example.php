@@ -7,6 +7,7 @@ $admin_username = '';
 $admin_password_hash = ''; // Generate with php cli/password.php.
 $phone_decryption_key = ''; // Set the private phone decryption key in config.php only.
 $statistics_sources = []; // Each source: url, bearer, uuid; local TLS sources also use local=true and ca_file.
+$orders_webhook_key = ''; // Separate shared secret for the website form receiver.
 $local_http = false;
 
 return [
@@ -14,6 +15,7 @@ return [
     'admin_username' => $admin_username, 'admin_password_hash' => $admin_password_hash,
     'phone_decryption_key' => $phone_decryption_key,
     'statistics_sources' => $statistics_sources,
+    'orders_webhook_key' => $orders_webhook_key,
     'phpmyadmin_url' => '', // Optional local DB administration link.
     'local_http' => $local_http, 'session_timeout' => 3600,
     'login_limit' => 5, 'login_window' => 900,
