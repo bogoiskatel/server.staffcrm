@@ -9,6 +9,8 @@ function check($condition, $message) {
     $checks++;
     if (!$condition) { throw new RuntimeException($message); }
 }
+$partial=Statistics::aggregate([['left_this_year'=>0,'source_metadata'=>json_encode(['availability'=>['members_left_year'=>['complete'=>false]]])]],1);
+check($partial['left_this_year']['value']===0&&!$partial['left_this_year']['complete'],'Known zero with missing dates must remain incomplete');
 $rows = [['members_total' => 12, 'baptized_this_month' => 0], ['members_total' => null, 'baptized_this_month' => 3]];
 $sum = Statistics::aggregate($rows, 3);
 check($sum['members_total']['value'] === 12, 'Known members must be summed');

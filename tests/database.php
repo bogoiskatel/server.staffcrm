@@ -1,5 +1,5 @@
 <?php
-putenv('STAFF_SERVER_CONFIG=' . dirname(__DIR__).'/work/test-config.php');
+putenv('STAFF_SERVER_CONFIG=' . dirname(__DIR__).'/tests/.local/config.php');
 require dirname(__DIR__).'/app/bootstrap.php';
 $config=configuration();
 if (strpos($config['db_dsn'],'dbname=server_test;')===false) { throw new RuntimeException('Test database required'); }

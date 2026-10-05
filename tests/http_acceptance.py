@@ -25,7 +25,7 @@ status, html, _ = request('/?route=login')
 token = csrf(html)
 status, html, _ = request('/?route=login', {'username':'admin','password':'wrong','csrf':token})
 assert status == 200 and 'name="password"' in html, 'Wrong password must retain login'
-credentials = json.loads(Path('work/test-access.json').read_text())
+credentials = json.loads(Path('tests/.local/access.json').read_text())
 session_before = [(cookie.name, cookie.value) for cookie in jar]
 status, html, url = request('/?route=login', {'username':credentials['username'],'password':credentials['password'],'csrf':csrf(html)})
 assert status == 200 and 'route=dashboard' in url and 'id="crm-table"' in html, 'Correct password must open dashboard'
@@ -46,7 +46,7 @@ request('/?route=logout', {'csrf':csrf(html)})
 assert 'route=login' in request('/?route=dashboard')[2], 'Logout must clear authentication'
 # Shorten only the isolated test session lifetime and restore config afterwards.
 import time
-test_config = Path('work/test-config.php')
+test_config = Path('tests/.local/config.php')
 original_config = test_config.read_text()
 try:
     test_config.write_text(original_config.replace("'session_name'=>'STAFFSERVERTEST'", "'session_name'=>'STAFFSERVERTEST','session_timeout'=>1"))

@@ -8,13 +8,22 @@ final class Statistics
     {
         $result = [];
         foreach (self::METRICS as $metric) {
-            $sum = 0; $known = 0;
+            $sum = 0; $known = 0; $complete = true;
             foreach ($rows as $row) {
-                if (isset($row[$metric])) { $sum += (int)$row[$metric]; $known++; }
+                if (isset($row[$metric])) { $sum += (int)$row[$metric]; $known++; if(!self::metricComplete($row,$metric))$complete=false; }
             }
-            $result[$metric] = ['value' => $known ? $sum : null, 'known' => $known, 'complete' => $expected > 0 && $known === $expected];
+            $result[$metric] = ['value' => $known ? $sum : null, 'known' => $known, 'complete' => $expected > 0 && $known === $expected && $complete];
         }
         return $result;
+    }
+
+    // Preserve the API's incomplete-date warning while still displaying known counts.
+    public static function metricComplete(array $row, string $metric): bool
+    {
+        $names=['members_total'=>'members_current','baptized_this_month'=>'baptized_month','baptized_this_year'=>'baptized_year','joined_this_year'=>'members_joined_year','left_this_year'=>'members_left_year','groups_current_season'=>'home_groups_current_season','discipline_total'=>'discipline_current'];
+        $metadata=json_decode($row['source_metadata']??'{}',true);
+        $state=$metadata['availability'][$names[$metric]??$metric]??[];
+        return ($state['complete']??true)!==false && ($state['available']??true)!==false;
     }
 
     // Prefer the church pair and never replace an invalid pair with a fabricated pin.

@@ -2,5 +2,7 @@
 /work/
 /.superpowers/
 /outputs/local-access.txt
+/tests/.local/
+/tests/__pycache__/
 *.log
 .DS_Store

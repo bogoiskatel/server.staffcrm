@@ -1,0 +1,50 @@
+--- a/crm_admin/classes/api/ApiStatistics.php
++++ b/crm_admin/classes/api/ApiStatistics.php
+@@ -17,25 +17,28 @@
+     }
+     // Compute date-based people counts in the current Kyiv calendar year.
+     function snapshot(DateTimeImmutable $now) {
+-        $local=$now->setTimezone(self::localZone());$year=(int)$local->format('Y');$start=$year.'-01-01';$end=($year+1).'-01-01';$today=$local->format('Y-m-d');
++        $local=$now->setTimezone(self::localZone());$year=(int)$local->format('Y');$start=$year.'-01-01';$end=($year+1).'-01-01';$today=$local->format('Y-m-d');$monthStart=$local->format('Y-m-01');$monthEnd=$local->modify('first day of next month')->format('Y-m-d');
+         $validJoin=self::validDate('memberSince');$validLeave=self::validDate('memberTo');$validBaptism=self::validDate('baptizeday');
+         $counts=$this->query("SELECT
+             SUM(status_id=2) AS members,
+-            SUM($validJoin AND memberSince>=? AND memberSince<? AND memberSince<=?) AS joined,
+-            SUM($validLeave AND memberTo>=? AND memberTo<? AND memberTo<=?) AS departed,
++            SUM($validJoin AND churchComeStatus IN ('1','2','4') AND memberSince>=? AND memberSince<? AND memberSince<=?) AS joined,
++            SUM($validLeave AND (churchLeaveStatus IN ('1','2','3','4') OR status_id IN (4,5,6)) AND memberTo>=? AND memberTo<? AND memberTo<=?) AS departed,
+             SUM($validBaptism AND churchComeStatus='1' AND baptizeday>=? AND baptizeday<? AND baptizeday<=?) AS baptized,
++            SUM($validBaptism AND churchComeStatus='1' AND baptizeday>=? AND baptizeday<? AND baptizeday<=?) AS baptized_month,
+             SUM((status_id IN (4,5,6) OR churchLeaveStatus IN ('1','2','3','4')) AND NOT COALESCE($validLeave,0)) AS missing_departure
+-            FROM contacts WHERE visibility='visible'",'sssssssss',[$start,$end,$today,$start,$end,$today,$start,$end,$today])[0];
++            FROM contacts WHERE visibility='visible'",'ssssssssssss',[$start,$end,$today,$start,$end,$today,$start,$end,$today,$monthStart,$monthEnd,$today])[0];
+         $availability=[];$left=(int)$counts['departed'];
+-        if((int)$counts['missing_departure']>0){$left=null;$availability['members_left_year']=['available'=>false,'reason'=>'missing_departure_dates'];}
++        if((int)$counts['missing_departure']>0)$availability['members_left_year']=['available'=>true,'complete'=>false,'reason'=>'missing_departure_dates','undated_records'=>(int)$counts['missing_departure']];
+         $seasons=$this->query("SELECT group_season_id FROM groups_seasons WHERE group_season_status='current'");$groups=null;
+         if(count($seasons)===1)$groups=(int)$this->query("SELECT COUNT(*) AS n FROM groups WHERE group_status='visible' AND group_season_id=?",'i',[(int)$seasons[0]['group_season_id']])[0]['n'];
+         else $availability['home_groups_current_season']=['available'=>false,'reason'=>count($seasons)?'ambiguous_current_season':'missing_current_season'];
+-        $validSince=self::validDate('d.discipline_since');$validTo=self::validDate('d.discipline_to');
+-        $unknown=$this->query("SELECT COUNT(*) AS n FROM contacts_discipline d JOIN contacts c ON c.ID=d.contact_ID WHERE c.visibility='visible' AND c.status_id IN (2,7) AND d.discipline_visibility='visible' AND (NOT COALESCE($validSince,0) OR d.discipline_type_id NOT IN (1,2,3,4) OR d.discipline_type_id IS NULL OR (d.discipline_to IS NOT NULL AND d.discipline_to<>'0000-00-00' AND (NOT COALESCE($validTo,0) OR d.discipline_to<d.discipline_since)))")[0]['n'];
+-        $discipline=null;
+-        if((int)$unknown===0)$discipline=(int)$this->query("SELECT COUNT(DISTINCT d.contact_ID) AS n FROM contacts_discipline d JOIN contacts c ON c.ID=d.contact_ID WHERE c.visibility='visible' AND c.status_id IN (2,7) AND d.discipline_visibility='visible' AND d.discipline_type_id IN (1,2) AND d.discipline_since<=? AND (d.discipline_to IS NULL OR d.discipline_to='0000-00-00' OR d.discipline_to>=?) AND NOT EXISTS(SELECT 1 FROM contacts_discipline later WHERE later.contact_ID=d.contact_ID AND later.discipline_visibility='visible' AND later.discipline_since<=? AND (later.discipline_since>d.discipline_since OR later.discipline_since=d.discipline_since AND later.id>d.id))",'sss',[$today,$today,$today])[0]['n'];
+-        else $availability['discipline_current']=['available'=>false,'reason'=>'invalid_discipline_history'];
++        // Match the CRM dashboard's visible-type list; restoration is the latest visible history record.
++        $discipline=(int)$this->query("SELECT COUNT(DISTINCT c.ID) AS n FROM contacts c
++            WHERE c.visibility='visible' AND c.status_id IN (2,7)
++            AND EXISTS(SELECT 1 FROM contacts_discipline d JOIN contacts_discipline_types t ON t.discipline_type_id=d.discipline_type_id WHERE d.contact_ID=c.ID AND t.discipline_visibility='visible')
++            AND NOT EXISTS(SELECT 1 FROM contacts_discipline restored WHERE restored.contact_ID=c.ID AND restored.discipline_visibility='visible' AND restored.discipline_type_id=4
++                AND NOT EXISTS(SELECT 1 FROM contacts_discipline newer WHERE newer.contact_ID=c.ID AND newer.discipline_visibility='visible' AND newer.id>restored.id))")[0]['n'];
++        $availability['discipline_current']=['available'=>true,'basis'=>'crm_dashboard_visible_types_latest_visible_record'];
+         $point=$this->locationProvider->location();
+         $login=$this->query('SELECT last_login_at,tracking_started_at FROM api_login_state WHERE id=1');$last=$login[0]['last_login_at']??null;
+         if($last===null)$availability['last_login_at']=['available'=>false,'reason'=>'no_observed_successful_login','tracking_started_at'=>isset($login[0])?str_replace(' ','T',$login[0]['tracking_started_at']).'Z':null];
+@@ -45,7 +48,7 @@
+         ApiProtocol::canonicalUrl($state['api_url']);
+         $availability['membership_history']=['complete'=>false,'basis'=>'distinct_people_stored_dates','hidden_contacts'=>'excluded'];
+         $availability['home_group_definition']=['basis'=>'visible_groups_all_types_current_season'];
+-        return ['version'=>1,'installation_uuid'=>$state['installation_uuid'],'crm_token'=>$state['crm_token'],'generated_at'=>$now->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d\TH:i:s\Z'),'year'=>$year,'timezone'=>'Europe/Kyiv','observed_period'=>$local->format('Y-m'),'members_current'=>(int)$counts['members'],'members_joined_year'=>(int)$counts['joined'],'members_left_year'=>$left,'home_groups_current_season'=>$groups,'last_login_at'=>$last===null?null:str_replace(' ','T',$last).'Z','discipline_current'=>$discipline,'baptized_year'=>(int)$counts['baptized'],'availability'=>$availability,'church_name'=>$profile===null?null:($profile['name']??null),'location'=>$point,'country_calling_code'=>$state['crm_token_country_code']??null,'country_iso'=>ApiProtocol::countryIso($profile===null?($state['api_country_iso']??null):($profile['country_iso2']??null)),'postcode'=>$profile===null?($state['crm_token_postcode']??null):($profile['postcode']?:null)];
++        return ['version'=>1,'installation_uuid'=>$state['installation_uuid'],'crm_token'=>$state['crm_token'],'generated_at'=>$now->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d\TH:i:s\Z'),'year'=>$year,'timezone'=>'Europe/Kyiv','observed_period'=>$local->format('Y-m'),'members_current'=>(int)$counts['members'],'members_joined_year'=>(int)$counts['joined'],'members_left_year'=>$left,'home_groups_current_season'=>$groups,'last_login_at'=>$last===null?null:str_replace(' ','T',$last).'Z','discipline_current'=>$discipline,'baptized_year'=>(int)$counts['baptized'],'baptized_month'=>(int)$counts['baptized_month'],'availability'=>$availability,'church_name'=>$profile===null?null:($profile['name']??null),'location'=>$point,'country_calling_code'=>$state['crm_token_country_code']??null,'country_iso'=>ApiProtocol::countryIso($profile===null?($state['api_country_iso']??null):($profile['country_iso2']??null)),'postcode'=>$profile===null?($state['crm_token_postcode']??null):($profile['postcode']?:null)];
+     }
+     // Export only installation metadata, leaving registration identity/ownership to the server protocol.
+     function registration($publicKey,DateTimeImmutable $now) {

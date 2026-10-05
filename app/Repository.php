@@ -7,7 +7,7 @@ final class Repository
     // List registry entries with a single, consistent reporting period.
     public function installations(?string $period): array
     {
-        $sql = 'SELECT i.*, s.reporting_period, s.generated_at, s.collected_at, s.members_total, s.baptized_this_month, s.baptized_this_year, s.joined_this_year, s.left_this_year, s.groups_current_season, s.discipline_total, s.last_successful_login,
+        $sql = 'SELECT i.*, s.reporting_period, s.generated_at, s.collected_at, s.members_total, s.baptized_this_month, s.baptized_this_year, s.joined_this_year, s.left_this_year, s.groups_current_season, s.discipline_total, s.last_successful_login, s.source_metadata,
           (SELECT MAX(collected_at) FROM statistics_snapshots WHERE installation_id=i.id) AS last_collected_at,
           (SELECT success FROM collection_attempts WHERE installation_id=i.id ORDER BY attempted_at DESC, id DESC LIMIT 1) AS latest_success
           FROM installations i LEFT JOIN statistics_snapshots s ON s.installation_id=i.id AND s.reporting_period=:period WHERE i.active=1 ORDER BY i.name, i.uuid';

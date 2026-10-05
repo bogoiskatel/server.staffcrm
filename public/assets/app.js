@@ -1,5 +1,11 @@
 'use strict';
 (function () {
+  // Preserve the current route while changing language through the CRM-style selector.
+  document.querySelectorAll('.staff-language-select').forEach(function (select) {
+    select.addEventListener('change', function () { window.location.assign(select.value); });
+  });
+  // Keep the user menu open while its language selector is being used.
+  $('.user-dd').on('click', function (event) { event.stopPropagation(); });
   const settings = JSON.parse(document.getElementById('app-settings').textContent);
   const labels = settings.labels;
   let networkMap;

@@ -25,6 +25,7 @@ if not ready():
         if ready(): break
         time.sleep(.2)
     else: raise RuntimeError('MariaDB did not start; see work/runtime/mysql.log')
+(ROOT/'tests/.local').mkdir(parents=True,exist_ok=True)
 config = ROOT/'config.php'
 if not config.exists():
     dbpass = secrets.token_hex(24); password = secrets.token_urlsafe(20)
@@ -36,20 +37,21 @@ if not config.exists():
         "GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,INDEX,ALTER,REFERENCES ON server_test.* TO 'staff_server_test'@'localhost';")
     content = "<?php\n$db_dsn = 'mysql:unix_socket="+SOCKET+";dbname=server;charset=utf8mb4';\n$db_username = 'staff_server';\n$db_password = '"+dbpass+"';\n$admin_username = 'admin';\n$admin_password_hash = '"+hashed+"';\nreturn array_merge(require __DIR__.'/config.example.php', compact('db_dsn','db_username','db_password','admin_username','admin_password_hash'));\n"
     # Keep variable assignments after example loading so they are not overwritten.
-    content = content.replace("<?php\n", "<?php\n$defaults = require __DIR__.'/config.example.php';\n").replace("array_merge(require __DIR__.'/config.example.php',", "array_merge($defaults,")
-    content = content.replace("compact('db_dsn','db_username','db_password','admin_username','admin_password_hash')", "compact('db_dsn','db_username','db_password','admin_username','admin_password_hash'), ['local_http'=>true]")
+    content = content.replace("<?php\n", "<?php\n$defaults = require __DIR__.'/config.example.php';\n$phone_decryption_key = '';\n").replace("array_merge(require __DIR__.'/config.example.php',", "array_merge($defaults,")
+    content = content.replace("compact('db_dsn','db_username','db_password','admin_username','admin_password_hash')", "compact('db_dsn','db_username','db_password','admin_username','admin_password_hash'), ['local_http'=>true,'phpmyadmin_url'=>'http://127.0.0.1:8092/']")
+    content = content.replace("'admin_password_hash')", "'admin_password_hash','phone_decryption_key')")
     config.write_text(content); config.chmod(0o600)
     access = ROOT/'outputs/local-access.txt'
     access.write_text('STAFF SERVER\nURL: http://127.0.0.1:8090\nUsername: admin\nPassword: '+password+'\n\nPrivate local credentials. Do not publish.\n'); access.chmod(0o600)
-    testconfig = content.replace("__DIR__.'/config.example.php'", "dirname(__DIR__).'/config.example.php'").replace('dbname=server;', 'dbname=server_test;').replace("$db_username = 'staff_server';", "$db_username = 'staff_server_test';").replace("['local_http'=>true]", "['local_http'=>true,'session_name'=>'STAFFSERVERTEST']")
-    (ROOT/'work/test-config.php').write_text(testconfig); (ROOT/'work/test-config.php').chmod(0o600)
-    (ROOT/'work/test-access.json').write_text(json.dumps({'username':'admin','password':password})); (ROOT/'work/test-access.json').chmod(0o600)
+    testconfig = content.replace("__DIR__.'/config.example.php'", "dirname(__DIR__,2).'/config.example.php'").replace('dbname=server;', 'dbname=server_test;').replace("$db_username = 'staff_server';", "$db_username = 'staff_server_test';").replace("['local_http'=>true,'phpmyadmin_url'=>'http://127.0.0.1:8092/']", "['local_http'=>true,'session_name'=>'STAFFSERVERTEST']")
+    (ROOT/'tests/.local/config.php').write_text(testconfig); (ROOT/'tests/.local/config.php').chmod(0o600)
+    (ROOT/'tests/.local/access.json').write_text(json.dumps({'username':'admin','password':password})); (ROOT/'tests/.local/access.json').chmod(0o600)
 subprocess.run([PHP,str(ROOT/'cli/migrate.php')],cwd=ROOT,check=True)
 services = [(8090,'php',config)]
-if (ROOT/'work/test-config.php').exists():
-    env = os.environ.copy(); env['STAFF_SERVER_CONFIG'] = str(ROOT/'work/test-config.php')
+if (ROOT/'tests/.local/config.php').exists():
+    env = os.environ.copy(); env['STAFF_SERVER_CONFIG'] = str(ROOT/'tests/.local/config.php')
     subprocess.run([PHP,str(ROOT/'cli/migrate.php')],cwd=ROOT,env=env,check=True)
-    services.append((8091,'test-php',ROOT/'work/test-config.php'))
+    services.append((8091,'test-php',ROOT/'tests/.local/config.php'))
 for port, filename, cfg in services:
     with socket.socket() as check:
         if check.connect_ex(('127.0.0.1',port)) == 0:
@@ -61,3 +63,4 @@ for port, filename, cfg in services:
         process = subprocess.Popen([PHP,'-d','display_errors=0','-d','opcache.enable=0','-d','session.save_path='+str(sessions),'-S','127.0.0.1:'+str(port),'-t',str(ROOT/'public'),str(ROOT/'local/router.php')],cwd=ROOT,env=env,stdout=log,stderr=log,start_new_session=True)
     (STATE/(filename+'.pid')).write_text(str(process.pid))
 print('STAFF SERVER: http://127.0.0.1:8090 — credentials: outputs/local-access.txt')
+subprocess.run(['python3',str(ROOT/'local/start-phpmyadmin.py')],cwd=ROOT,check=True)

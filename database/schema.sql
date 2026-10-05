@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS statistics_snapshots (
  groups_current_season INT UNSIGNED NULL,
  discipline_total INT UNSIGNED NULL,
  last_successful_login DATETIME NULL,
+ source_metadata MEDIUMTEXT NULL,
  UNIQUE KEY installation_period(installation_id, reporting_period),
  FOREIGN KEY(installation_id) REFERENCES installations(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
